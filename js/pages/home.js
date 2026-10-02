@@ -26,7 +26,7 @@
             grid.innerHTML = posts.map(post => {
                 const date = formatDate(post.published_at);
                 const tags = (post.tags || []).map(t => '<span class="tag">' + t + '</span>').join('');
-                return '<a href="post.html?slug=' + encodeURIComponent(post.slug) + '" class="ticket" data-category="' + post.category + '">' +
+                return '<a href="#/post?slug=' + encodeURIComponent(post.slug) + '" class="ticket" data-category="' + post.category + '">' +
                     '<div class="ticket__left"><div class="ticket__date">' + date.date + '</div><div class="ticket__year">' + date.year + '</div></div>' +
                     '<div class="ticket__divider"></div>' +
                     '<div class="ticket__right">' +
@@ -150,7 +150,7 @@
                         '</div>' +
                     '</div>' +
                     '<div class="comment-book-card__footer" style="grid-column:1/-1; text-align:center;">' +
-                        '<a href="audience.html" class="comment-book-card__btn">去观众席写一句 →</a>' +
+                        '<a href="#/audience" class="comment-book-card__btn">去观众席写一句 →</a>' +
                     '</div>' +
                     '<div class="comment-book-card__tear">SIT & SAY</div>';
                 return;
@@ -178,7 +178,7 @@
                     '<div class="comment-book-card__page-back"></div>' +
                 '</div>' +
                 '<div class="comment-book-card__footer">' +
-                    '<a href="audience.html" class="comment-book-card__btn">去观众席写一句 →</a>' +
+                    '<a href="#/audience" class="comment-book-card__btn">去观众席写一句 →</a>' +
                 '</div>' +
                 '<div class="comment-book-card__tear">SIT & SAY</div>';
         } catch (err) {

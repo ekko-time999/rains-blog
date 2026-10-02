@@ -1,6 +1,7 @@
 /**
  * Rains Blog SPA Router
  * 前端路由，切换页面时不刷新整个文档，只替换内容区域
+ * 支持 hash 路由（GitHub Pages 兼容）
  */
 (function() {
     'use strict';
@@ -8,14 +9,14 @@
     // 路由表：路径模式 → 页面名
     var routes = [
         { pattern: /^\/(index\.html)?$/, name: 'home', file: 'pages/home.html' },
-        { pattern: /^\/posts\.html$/, name: 'posts', file: 'pages/posts.html' },
-        { pattern: /^\/post\.html/, name: 'post', file: 'pages/post.html' },
-        { pattern: /^\/projects\.html$/, name: 'projects', file: 'pages/projects.html' },
-        { pattern: /^\/about\.html$/, name: 'about', file: 'pages/about.html' },
-        { pattern: /^\/friends\.html$/, name: 'friends', file: 'pages/friends.html' },
-        { pattern: /^\/recommendations\.html$/, name: 'recommendations', file: 'pages/recommendations.html' },
-        { pattern: /^\/archive\.html$/, name: 'archive', file: 'pages/archive.html' },
-        { pattern: /^\/audience\.html$/, name: 'audience', file: 'pages/audience.html' }
+        { pattern: /^\/posts(\.html)?$/, name: 'posts', file: 'pages/posts.html' },
+        { pattern: /^\/post(\.html)?/, name: 'post', file: 'pages/post.html' },
+        { pattern: /^\/projects(\.html)?$/, name: 'projects', file: 'pages/projects.html' },
+        { pattern: /^\/about(\.html)?$/, name: 'about', file: 'pages/about.html' },
+        { pattern: /^\/friends(\.html)?$/, name: 'friends', file: 'pages/friends.html' },
+        { pattern: /^\/recommendations(\.html)?$/, name: 'recommendations', file: 'pages/recommendations.html' },
+        { pattern: /^\/archive(\.html)?$/, name: 'archive', file: 'pages/archive.html' },
+        { pattern: /^\/audience(\.html)?$/, name: 'audience', file: 'pages/audience.html' }
     ];
 
     var currentPageName = null;
@@ -35,6 +36,30 @@
      */
     function setTransitionCallbacks(onStart, onEnd) {
         onPageChange = { onStart: onStart, onEnd: onEnd };
+    }
+
+    /**
+     * 从 hash 中获取当前路径
+     */
+    function getPathFromHash() {
+        var hash = window.location.hash.slice(1); // 去掉 #
+        if (!hash) return '/';
+        // 去掉查询参数
+        var queryIndex = hash.indexOf('?');
+        if (queryIndex !== -1) {
+            return hash.slice(0, queryIndex);
+        }
+        return hash;
+    }
+
+    /**
+     * 从 hash 中获取查询参数
+     */
+    function getParamsFromHash() {
+        var hash = window.location.hash.slice(1);
+        var queryIndex = hash.indexOf('?');
+        if (queryIndex === -1) return {};
+        return parseQuery(hash.slice(queryIndex));
     }
 
     /**
@@ -108,19 +133,9 @@
      */
     function push(url, options) {
         options = options || {};
-        var parsed = parseUrl(url);
-        var route = matchRoute(parsed.pathname);
-        if (!route) {
-            window.location.href = url; // 不匹配的路由走传统跳转
-            return;
-        }
-
-        // 更新 URL
-        if (!options.skipHistory) {
-            history.pushState({ page: route.name }, '', url);
-        }
-
-        navigate(route, parsed.params);
+        // 转换成 hash 格式
+        var hashUrl = '#/' + url.replace(/^\//, '').replace(/\.html$/, '');
+        window.location.hash = hashUrl;
     }
 
     /**
@@ -171,18 +186,6 @@
     }
 
     /**
-     * 解析 URL
-     */
-    function parseUrl(url) {
-        var a = document.createElement('a');
-        a.href = url;
-        return {
-            pathname: a.pathname,
-            params: parseQuery(a.search)
-        };
-    }
-
-    /**
      * 更新页面标题
      */
     function updateTitle(pageName) {
@@ -209,37 +212,42 @@
             history.scrollRestoration = 'manual';
         }
 
-        var path = window.location.pathname;
-        var route = matchRoute(path);
-        if (!route) {
-            // 不匹配的路由，直接加载整个页面
-            return;
+        function handleRoute() {
+            var path = getPathFromHash();
+            var route = matchRoute(path);
+            if (!route) {
+                // 默认跳转到首页
+                window.location.hash = '#/home';
+                return;
+            }
+            var params = getParamsFromHash();
+
+            // 加载并渲染页面内容
+            loadPageFile(route.file)
+                .then(function(html) {
+                    renderContent(html);
+                    currentPageName = route.name;
+                    currentParams = params;
+                    document.body.dataset.page = route.name;
+                    runInit(route.name, params);
+                    updateTitle(route.name);
+
+                    // 首次加载（刷新页面）：直接滚动到顶部
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                })
+                .catch(function(err) {
+                    console.error('Router init error:', err);
+                });
         }
-        var params = parseQuery(window.location.search);
 
-        // 加载并渲染页面内容
-        loadPageFile(route.file)
-            .then(function(html) {
-                renderContent(html);
-                currentPageName = route.name;
-                currentParams = params;
-                document.body.dataset.page = route.name;
-                runInit(route.name, params);
-                updateTitle(route.name);
+        handleRoute();
 
-                // 首次加载（刷新页面）：直接滚动到顶部
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-            })
-            .catch(function(err) {
-                console.error('Router init error:', err);
-            });
-
-        // 监听 popstate（S6 启用）
-        window.addEventListener('popstate', function(e) {
-            var path = window.location.pathname;
+        // 监听 hashchange 事件
+        window.addEventListener('hashchange', function(e) {
+            var path = getPathFromHash();
             var route = matchRoute(path);
             if (route) {
-                var params = parseQuery(window.location.search);
+                var params = getParamsFromHash();
                 navigate(route, params);
             }
         });

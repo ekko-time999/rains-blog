@@ -122,14 +122,14 @@
     var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var navLinks = [
-        { page: 'home', label: '首页', href: 'index.html', icon: '\u25C9' },
-        { page: 'posts', label: '剧目', href: 'posts.html', icon: '\u2630' },
-        { page: 'projects', label: '工坊', href: 'projects.html', icon: '\u2605' },
-        { page: 'about', label: '关于', href: 'about.html', icon: '\u25C8' },
-        { page: 'friends', label: '友链', href: 'friends.html', icon: '\u266A' },
-        { page: 'recommendations', label: '私藏', href: 'recommendations.html', icon: '\u266B' },
-        { page: 'archive', label: '归档', href: 'archive.html', icon: '\u2F37' },
-        { page: 'audience', label: '观众席', href: 'audience.html', icon: '\u2709' }
+        { page: 'home', label: '首页', href: '#/home', icon: '\u25C9' },
+        { page: 'posts', label: '剧目', href: '#/posts', icon: '\u2630' },
+        { page: 'projects', label: '工坊', href: '#/projects', icon: '\u2605' },
+        { page: 'about', label: '关于', href: '#/about', icon: '\u25C8' },
+        { page: 'friends', label: '友链', href: '#/friends', icon: '\u266A' },
+        { page: 'recommendations', label: '私藏', href: '#/recommendations', icon: '\u266B' },
+        { page: 'archive', label: '归档', href: '#/archive', icon: '\u2F37' },
+        { page: 'audience', label: '观众席', href: '#/audience', icon: '\u2709' }
     ];
     /* 固定标语池（每次随机选5条） */
     var tickerPool = [
@@ -219,7 +219,7 @@
         var mobileHtml = mobileTabs.map(function(l) {
             return '<a href="' + l.href + '" class="mobile-tabbar__item ' + (l.page === currentPage ? 'mobile-tabbar__item--active' : '') + '" data-page="' + l.page + '"><span class="mobile-tabbar__icon">' + l.icon + '</span><span>' + l.label + '</span></a>';
         }).join('');
-        return '<div class="nav-marquee"><div class="nav-marquee__bulbs"></div><div class="nav-marquee__inner"><a href="index.html" class="nav-marquee__brand">RAINS</a><nav class="nav-marquee__links">' + linksHtml + '</nav><div class="nav-marquee__right" id="navRight"></div></div><div class="nav-ticker"><div class="nav-ticker__track">' + tickerHtml + '</div></div></div><div class="mobile-tabbar"><div class="mobile-tabbar__inner">' + mobileHtml + '</div></div>';
+        return '<div class="nav-marquee"><div class="nav-marquee__bulbs"></div><div class="nav-marquee__inner"><a href="#/home" class="nav-marquee__brand">RAINS</a><nav class="nav-marquee__links">' + linksHtml + '</nav><div class="nav-marquee__right" id="navRight"></div></div><div class="nav-ticker"><div class="nav-ticker__track">' + tickerHtml + '</div></div></div><div class="mobile-tabbar"><div class="mobile-tabbar__inner">' + mobileHtml + '</div></div>';
     }
 
     var castList = ['剧场主理人 / 导演 / 主演 — Rains','舞台监督 — JavaScript','灯光设计 — CSS Spotlight','服装 — Vanilla CSS','配乐 — 键盘敲击声','特别感谢 — 每一位访客','剧场主理人 / 导演 / 主演 — Rains','舞台监督 — JavaScript','灯光设计 — CSS Spotlight','服装 — Vanilla CSS','配乐 — 键盘敲击声','特别感谢 — 每一位访客'];
