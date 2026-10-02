@@ -20,69 +20,6 @@
 
     var siteChrome = window.RainsChrome;
 
-    function initPostFilter() {
-        if (currentPage !== 'posts') return;
-        var filterBar = document.getElementById('filterBar');
-        var grid = document.getElementById('ticketGrid');
-        var emptyState = document.getElementById('emptyState');
-        if (!filterBar || !grid) return;
-        var buttons = filterBar.querySelectorAll('.filter-btn');
-        var tickets = grid.querySelectorAll('.ticket');
-        buttons.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var filter = btn.dataset.filter;
-                buttons.forEach(function(b) { b.classList.remove('tag-active'); });
-                btn.classList.add('tag-active');
-                var count = 0;
-                tickets.forEach(function(t) {
-                    if (filter === 'all' || t.dataset.category === filter) { t.style.display = 'flex'; count++; }
-                    else { t.style.display = 'none'; }
-                });
-                if (emptyState) emptyState.style.display = count === 0 ? 'block' : 'none';
-            });
-        });
-    }
-
-    function initProgressBar() {
-        if (currentPage !== 'post') return;
-        var bar = document.getElementById('progressBar');
-        var actLabel = document.getElementById('progressAct');
-        var nodes = document.querySelectorAll('.progress-node');
-        if (!bar) return;
-        var acts = [
-            { max: 10, name: '序曲' },
-            { max: 35, name: 'Act I' },
-            { max: 60, name: 'Intermission' },
-            { max: 85, name: 'Act II' },
-            { max: 101, name: 'Finale' }
-        ];
-        function update() {
-            var st = window.pageYOffset || document.documentElement.scrollTop;
-            var dh = document.documentElement.scrollHeight - window.innerHeight;
-            var pct = dh > 0 ? (st / dh) * 100 : 0;
-            bar.style.width = pct + '%';
-            // S3: 更新当前幕次
-            if (actLabel) {
-                for (var i = 0; i < acts.length; i++) {
-                    if (pct < acts[i].max) { actLabel.textContent = acts[i].name; break; }
-                }
-            }
-            // S3: 高亮已到达节点
-            nodes.forEach(function(node) {
-                var nodePos = parseFloat(node.style.left);
-                if (pct >= nodePos - 2) { node.classList.add('progress-node--active'); }
-                else { node.classList.remove('progress-node--active'); }
-            });
-            // S6 hook: 到达 100% 触发终曲
-            if (pct >= 99 && !window._finalePlayed) {
-                window._finalePlayed = true;
-                if (window.RainsAudio && window.RainsAudio.playFinale) window.RainsAudio.playFinale();
-            }
-        }
-        window.addEventListener('scroll', update, { passive: true });
-        update();
-    }
-
     function initMetronome() {
         // S5: 节拍指示灯，prefers-reduced-motion 时禁用
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -110,87 +47,6 @@
         });
         document.body.appendChild(light);
         applyBpm();
-    }
-
-    function initTOC() {
-        if (currentPage !== 'post') return;
-        var tocLinks = document.querySelectorAll('.post-toc__link');
-        var sections = document.querySelectorAll('.act-title');
-        if (!tocLinks.length || !sections.length) return;
-        var toggle = document.getElementById('tocToggle');
-        var toc = document.getElementById('postToc');
-        if (toggle && toc) { toggle.addEventListener('click', function() { toc.classList.toggle('post-toc--open'); }); }
-        tocLinks.forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                var target = document.getElementById(link.dataset.target);
-                if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (toc) toc.classList.remove('post-toc--open'); }
-            });
-        });
-        if ('IntersectionObserver' in window) {
-            var observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        var id = entry.target.id;
-                        tocLinks.forEach(function(l) { l.classList.toggle('post-toc__link--active', l.dataset.target === id); });
-                    }
-                });
-            }, { rootMargin: '-20% 0px -70% 0px' });
-            sections.forEach(function(s) { observer.observe(s); });
-        }
-    }
-
-    function initTearAnimation() {
-        if (currentPage !== 'post') return;
-        var fromList = sessionStorage.getItem('rains_tear_from_list');
-        if (!fromList || prefersReducedMotion) { sessionStorage.removeItem('rains_tear_from_list'); return; }
-        var main = document.getElementById('main-content');
-        if (main) {
-            main.style.opacity = '0';
-            main.style.transform = 'scale(0.98)';
-            main.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-            setTimeout(function() { main.style.opacity = '1'; main.style.transform = 'scale(1)'; }, 100);
-        }
-        sessionStorage.removeItem('rains_tear_from_list');
-    }
-
-    function initTearSource() {
-        if (currentPage !== 'posts') return;
-        document.querySelectorAll('.ticket').forEach(function(t) {
-            t.addEventListener('click', function() { sessionStorage.setItem('rains_tear_from_list', '1'); });
-        });
-    }
-
-    /* S5: 散场灯光 — 滚动到谢幕区时背景渐亮 */
-    function initHouseLights() {
-        if (currentPage !== 'post') return;
-        var curtainCall = document.querySelector('.curtain-cta');
-        if (!curtainCall) return;
-
-        function setLights(on) {
-            document.body.style.backgroundColor = on ? '#2A2520' : '';
-        }
-
-        if (!('IntersectionObserver' in window)) {
-            window.addEventListener('scroll', function() {
-                var rect = curtainCall.getBoundingClientRect();
-                setLights(rect.top < window.innerHeight * 0.7);
-            }, { passive: true });
-            return;
-        }
-
-        var applausePlayed = false;
-        var observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                setLights(entry.isIntersecting);
-                if (entry.isIntersecting && !applausePlayed) {
-                    applausePlayed = true;
-                    window.RainsAudio.playApplause();
-                }
-            });
-        }, { threshold: 0.25 });
-
-        observer.observe(curtainCall);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -276,13 +132,8 @@
 
         window.RainsCurtain.initPage(currentPage, prefersReducedMotion);
         window.RainsBell.init(currentPage, prefersReducedMotion);
-        initPostFilter();
-        initProgressBar(); initMetronome();
-        initTOC();
-        initTearAnimation();
-        initTearSource();
+        initMetronome();
         window.RainsCurtain.initExit(prefersReducedMotion);
-        initHouseLights();
         initCurrentTime();
         console.log('Rains loaded — page:', currentPage);
         
