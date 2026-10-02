@@ -13,10 +13,9 @@
     async function loadRecs() {
         const grid = document.getElementById('recGrid');
         if (!grid) return;
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:var(--space-3xl);color:var(--text-dim);">正在加载私藏…</div>';
         try {
-            const url = currentType === 'all' ? '/api/recommendations' : '/api/recommendations?type=' + currentType;
-            const res = await fetch(url);
-            const data = await res.json();
+            const data = await PublicAPI.getRecommendations(currentType === 'all' ? '' : currentType);
             const recs = Array.isArray(data) ? data : (data.recommendations || []);
             if (recs.length === 0) {
                 grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:var(--space-3xl);color:var(--text-dim);">暂无内容</div>';
@@ -43,7 +42,7 @@
                     '<div class="vinyl-card__tear">' + tearText + '</div></' + cardTag + '>';
             }).join('');
         } catch (err) {
-            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:var(--space-3xl);color:var(--curtain);">加载失败</div>';
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:var(--space-3xl);color:var(--curtain);">加载失败：' + err.message + '</div>';
         }
     }
 
