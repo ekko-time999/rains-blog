@@ -7,6 +7,7 @@
     async function loadArchive() {
         const container = document.getElementById('archiveContainer');
         if (!container) return;
+        container.innerHTML = '<div style="text-align:center; padding:var(--space-xl); color:var(--text-dim);">正在加载归档…</div>';
         try {
             const data = await PublicAPI.getArchive();
             const posts = Array.isArray(data) ? data : (data.posts || []);
@@ -28,7 +29,7 @@
                 '</div>';
             }).join('');
         } catch (err) {
-            container.innerHTML = '<div style="text-align:center; padding:var(--space-xl); color:var(--curtain);">加载失败</div>';
+            container.innerHTML = '<div style="text-align:center; padding:var(--space-xl); color:var(--curtain);">加载失败：' + err.message + '</div>';
         }
     }
 
