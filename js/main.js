@@ -121,115 +121,7 @@
     var currentPage = document.body.dataset.page || initialPage;
     var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var navLinks = [
-        { page: 'home', label: '首页', href: 'index.html', icon: '\u25C9' },
-        { page: 'posts', label: '剧目', href: 'posts.html', icon: '\u2630' },
-        { page: 'projects', label: '工坊', href: 'projects.html', icon: '\u2605' },
-        { page: 'about', label: '关于', href: 'about.html', icon: '\u25C8' },
-        { page: 'friends', label: '友链', href: 'friends.html', icon: '\u266A' },
-        { page: 'recommendations', label: '私藏', href: 'recommendations.html', icon: '\u266B' },
-        { page: 'archive', label: '归档', href: 'archive.html', icon: '\u2F37' },
-        { page: 'audience', label: '观众席', href: 'audience.html', icon: '\u2709' }
-    ];
-    /* 固定标语池（每次随机选5条） */
-    var tickerPool = [
-        '用代码演绎你的想象',
-        '幕布已拉开，请随意落座',
-        '演出即将开始，请保持安静',
-        '谢幕时请留下掌声',
-        '中场休息，喝杯咖啡吧',
-        '灯光已就绪，舞台已点亮',
-        '下一幕：更精彩的故事',
-        '彩蛋藏在文末',
-        '本场演出由你主导',
-        '屏息期待，好戏开场',
-        '今晚的星光为你点亮',
-        '每一场演出都是独一无二的',
-        '掌声是最好的鼓励',
-        '压轴好戏不容错过',
-        '欢迎来到 Rains 剧场',
-        '演出时长：约一首歌的时间'
-    ];
-
-    /* 页面对应的演出介绍 */
-    var pageIntroMap = {
-        home: '主剧场 — 欢迎来到 Rains',
-        posts: 'Now Playing — 最新文章已上线',
-        projects: '侧幕 — 代码作品集',
-        about: '剧场主理人 — Rains',
-        friends: '特别感谢 — 每一位访客',
-        recommendations: '中场休息 — 私藏曲目单',
-        archive: '往期演出 — 全部剧目',
-        audience: '观众席 — 写下你的观演感受'
-    };
-
-    /* 舞台监督随机提示语库 */
-    var stageManagerQuotes = [
-        '舞台监督：道具已就位',
-        '舞台监督：灯光检查完毕',
-        '舞台监督：演员已到侧幕',
-        '舞台监督：本场演出即将开始',
-        '舞台监督：感谢关闭手机铃声',
-        '舞台监督：中场休息有售吧台',
-        '舞台监督：祝您观演愉快',
-        '舞台监督：下一场更精彩',
-        '舞台监督：乐手已就位',
-        '舞台监督：幕布检查完毕'
-    ];
-
-    function buildNav() {
-        var linksHtml = navLinks.map(function(l) {
-            return '<a href="' + l.href + '" class="nav-marquee__link ' + (l.page === currentPage ? 'nav-marquee__link--active' : '') + '" data-page="' + l.page + '">' + l.label + '</a>';
-        }).join('');
-
-        /* 跑马灯：循环单元 = [舞台监督] + [5灰] + [页面介绍] + [5灰] = 12条
-           两个黄色高亮项之间隔5条灰色，不会挨着 */
-        var pageIntro = pageIntroMap[currentPage] || pageIntroMap.home;
-        var UNIT_SIZE = 12;
-        var UNIT_COUNT = 8;
-
-        function buildUnit() {
-            var quote = stageManagerQuotes[Math.floor(Math.random() * stageManagerQuotes.length)];
-            var shuffled = tickerPool.slice().sort(function() { return Math.random() - 0.5; });
-            var fixedA = shuffled.slice(0, 5);
-            var fixedB = shuffled.slice(5, 10);
-            return [quote].concat(fixedA, [pageIntro], fixedB);
-        }
-
-        var units = [];
-        for (var u = 0; u < UNIT_COUNT; u++) {
-            units.push(buildUnit());
-        }
-        units.push(units[0].slice());
-
-        var allItems = units.reduce(function(acc, unit) { return acc.concat(unit); }, []);
-        var tickerHtml = allItems.map(function(t, i) {
-            var posInUnit = i % UNIT_SIZE;
-            var highlight = '';
-            var extraClass = '';
-            if (posInUnit === 0) {
-                highlight = ' nav-ticker__item--highlight'; // 舞台监督
-            } else if (posInUnit === 6) {
-                highlight = ' nav-ticker__item--highlight'; // 页面介绍
-                extraClass = ' page-intro';
-            }
-            return '<span class="nav-ticker__item' + highlight + extraClass + '">\u2726 ' + t + '</span>';
-        }).join('');
-        var mobileTabs = navLinks.filter(function(l) { return ['home','posts','about','friends'].indexOf(l.page) !== -1; });
-        var mobileHtml = mobileTabs.map(function(l) {
-            return '<a href="' + l.href + '" class="mobile-tabbar__item ' + (l.page === currentPage ? 'mobile-tabbar__item--active' : '') + '" data-page="' + l.page + '"><span class="mobile-tabbar__icon">' + l.icon + '</span><span>' + l.label + '</span></a>';
-        }).join('');
-        return '<div class="nav-marquee"><div class="nav-marquee__bulbs"></div><div class="nav-marquee__inner"><a href="index.html" class="nav-marquee__brand">RAINS</a><nav class="nav-marquee__links">' + linksHtml + '</nav><div class="nav-marquee__right" id="navRight"></div></div><div class="nav-ticker"><div class="nav-ticker__track">' + tickerHtml + '</div></div></div><div class="mobile-tabbar"><div class="mobile-tabbar__inner">' + mobileHtml + '</div></div>';
-    }
-
-    var castList = ['剧场主理人 / 导演 / 主演 — Rains','舞台监督 — JavaScript','灯光设计 — CSS Spotlight','服装 — Vanilla CSS','配乐 — 键盘敲击声','特别感谢 — 每一位访客','剧场主理人 / 导演 / 主演 — Rains','舞台监督 — JavaScript','灯光设计 — CSS Spotlight','服装 — Vanilla CSS','配乐 — 键盘敲击声','特别感谢 — 每一位访客'];
-    function buildFooter() {
-        var castHtml = castList.map(function(c, i) {
-            return '<div class="footer-cast__line ' + (i === 0 || i === 6 ? 'footer-cast__line--star' : '') + '">' + c + '</div>';
-        }).join('');
-        return '<div class="footer-cast"><div class="footer-cast__track">' + castHtml + '</div></div><div class="footer-bottom container"><div class="footer-social"><a href="https://github.com" target="_blank" rel="noopener" class="footer-social__link" title="GitHub">GH</a><a href="mailto:hello@rains.dev" class="footer-social__link" title="Email">@</a><a href="#" class="footer-social__link" title="RSS">RSS</a></div><div class="footer-copy">♪ &copy; 2026 Rains &nbsp;|&nbsp; 用代码演绎你的想象 ♫</div><div class="footer-signature">Rains</div></div>';
-    }
-
+    var siteChrome = window.RainsChrome;
     var curtainOpened = false;
     function openCurtain() {
         if (curtainOpened) return;
@@ -614,8 +506,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         var navSlot = document.querySelector('[data-nav]');
         var footerSlot = document.querySelector('[data-footer]');
-        if (navSlot) navSlot.outerHTML = buildNav();
-        if (footerSlot) footerSlot.outerHTML = '<footer class="site-footer" id="main-footer">' + buildFooter() + '</footer>';
+        if (navSlot) navSlot.outerHTML = siteChrome.buildNav(currentPage);
+        if (footerSlot) footerSlot.outerHTML = '<footer class="site-footer" id="main-footer">' + siteChrome.buildFooter() + '</footer>';
         // 计算跑马灯循环宽度：8个单元×12条=96条，loop-width=前8个单元总宽
         function computeLoopWidth() {
             var track = document.querySelector('.nav-ticker__track');
@@ -649,7 +541,7 @@
                     var newPage = window.RainsRouter.getCurrentPage();
                     document.body.dataset.page = newPage;
                     // 更新跑马灯页面介绍文本
-                    var newIntro = pageIntroMap[newPage] || pageIntroMap.home;
+                    var newIntro = siteChrome.pageIntroMap[newPage] || siteChrome.pageIntroMap.home;
                     document.querySelectorAll('.page-intro').forEach(function(el) {
                         el.textContent = newIntro;
                     });
@@ -675,7 +567,7 @@
                 var newPage = window.RainsRouter.getCurrentPage();
                 document.body.dataset.page = newPage;
                 // 更新跑马灯页面介绍文本
-                var newIntro = pageIntroMap[newPage] || pageIntroMap.home;
+                var newIntro = siteChrome.pageIntroMap[newPage] || siteChrome.pageIntroMap.home;
                 document.querySelectorAll('.page-intro').forEach(function(el) {
                     el.textContent = '\u2726 ' + newIntro;
                 });
