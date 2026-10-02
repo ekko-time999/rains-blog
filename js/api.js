@@ -3,6 +3,7 @@
    Unified fetch wrapper for all API calls
    ============================================ */
 const API_BASE = '/api';
+const API_TIMEOUT_MS = 10000;
 
 // Get auth token from localStorage
 function getToken() {
@@ -24,28 +25,51 @@ async function apiFetch(endpoint, options = {}) {
         headers['Content-Type'] = 'application/json';
     }
 
-    const response = await fetch(API_BASE + endpoint, { ...options, headers });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+    let response;
+    try {
+        response = await fetch(API_BASE + endpoint, {
+            ...options,
+            headers,
+            signal: options.signal || controller.signal
+        });
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('请求超时，请稍后重试');
+        }
+        throw new Error('网络连接失败，请检查网络后重试');
+    } finally {
+        clearTimeout(timeoutId);
+    }
+
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(data.error || 'API request failed: ' + response.status);
+        const error = new Error(data.error || '请求失败（' + response.status + '）');
+        error.status = response.status;
+        throw error;
     }
     return data;
+}
+
+function encodePathSegment(value) {
+    return encodeURIComponent(String(value));
 }
 
 // Public API
 const PublicAPI = {
     // Posts
     getPosts: (category = '', page = 1) => apiFetch('/posts?category=' + encodeURIComponent(category) + '&page=' + page),
-    getPost: (slug) => apiFetch('/posts/' + slug),
-    getAdjacent: (slug) => apiFetch('/posts/' + slug + '/adjacent'),
+    getPost: (slug) => apiFetch('/posts/' + encodePathSegment(slug)),
+    getAdjacent: (slug) => apiFetch('/posts/' + encodePathSegment(slug) + '/adjacent'),
     getArchive: () => apiFetch('/posts/archive'),
     // Projects
     getProjects: () => apiFetch('/projects'),
     // Friends
     getFriends: () => apiFetch('/friends'),
     // Recommendations
-    getRecommendations: (type) => apiFetch('/recommendations' + (type ? '?type=' + type : '')),
+    getRecommendations: (type) => apiFetch('/recommendations' + (type ? '?type=' + encodeURIComponent(type) : '')),
     // Messages（观众席留言）
     getMessages: () => apiFetch('/messages'),
     postMessage: (data) => apiFetch('/messages', { method: 'POST', body: JSON.stringify(data) }),
