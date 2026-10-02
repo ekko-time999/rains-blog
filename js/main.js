@@ -20,103 +20,6 @@
 
     var siteChrome = window.RainsChrome;
 
-    /* S4: 开场铃声（Web Audio API 合成三声剧场铃） */
-    function initOpeningBell() {
-        // 先创建声音开关（所有页面都有）
-        createBellToggle(window.RainsAudio.isMuted());
-
-        if (currentPage !== 'home') return;
-        if (prefersReducedMotion) return;
-        var isTouch = window.matchMedia('(hover: none)').matches;
-        if (isTouch) window.RainsAudio.setMuted(true);
-        if (window.RainsAudio.isMuted()) return; // 静音时不播放铃声，幕布由 initPageCurtain 统一打开
-
-        var bellTriggered = false;
-
-        function trigger() {
-            if (bellTriggered) return;
-            bellTriggered = true;
-            window.RainsAudio.unlock();
-            // 三声剧场铃
-            (function playBell() {
-                var c = window.RainsAudio._ctx || null;
-                // 用 RainsAudio 内部 tone 不方便，直接用简单实现
-                var ctx = null;
-                try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { window.RainsCurtain.open(); return; }
-                if (ctx.state === 'suspended') ctx.resume();
-                var now = ctx.currentTime;
-                [0, 0.42, 0.84].forEach(function(t) {
-                    var osc = ctx.createOscillator();
-                    var gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880, now + t);
-                    osc.frequency.exponentialRampToValueAtTime(860, now + t + 0.25);
-                    gain.gain.setValueAtTime(0, now + t);
-                    gain.gain.linearRampToValueAtTime(0.2, now + t + 0.01);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + t + 0.3);
-                    osc.connect(gain); gain.connect(ctx.destination);
-                    osc.start(now + t); osc.stop(now + t + 0.35);
-                });
-            })();
-            // 序曲（与铃声同时开始）
-            window.RainsAudio.playOverture();
-            // 幕布由 initPageCurtain 统一在 300ms 后打开，此处不再控制时序
-        }
-
-        trigger();
-        if (!bellTriggered) {
-            var onInteract = function() {
-                trigger();
-                document.removeEventListener('mousemove', onInteract);
-                document.removeEventListener('click', onInteract);
-                document.removeEventListener('keydown', onInteract);
-                document.removeEventListener('touchstart', onInteract);
-            };
-            document.addEventListener('mousemove', onInteract);
-            document.addEventListener('click', onInteract);
-            document.addEventListener('keydown', onInteract);
-            document.addEventListener('touchstart', onInteract);
-        }
-    }
-
-    function createBellToggle(initialMuted) {
-        var btn = document.createElement('button');
-        btn.className = 'bell-toggle';
-        btn.setAttribute('aria-label', initialMuted ? '开启声音' : '静音');
-        var icon = document.createElement('span');
-        icon.className = 'bell-toggle__icon';
-        icon.innerHTML =
-            '<svg class="bt-sound" viewBox="0 0 24 24" width="18" height="18">' +
-            '<path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/>' +
-            '<path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
-            '</svg>' +
-            '<svg class="bt-muted" viewBox="0 0 24 24" width="18" height="18">' +
-            '<path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/>' +
-            '<path d="M15 9l6 6M21 9l-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
-            '</svg>';
-        function applyMuted(m) {
-            icon.classList.toggle('is-muted', m);
-            btn.setAttribute('aria-label', m ? '开启声音' : '静音');
-        }
-        applyMuted(initialMuted);
-        btn.appendChild(icon);
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var nowMuted = window.RainsAudio.isMuted();
-            if (nowMuted) {
-                window.RainsAudio.setMuted(false);
-                applyMuted(false);
-            } else {
-                window.RainsAudio.setMuted(true);
-                applyMuted(true);
-            }
-        });
-        // 放入导航栏右侧容器（与导航文字 flex 垂直居中），找不到时兜底挂到 body
-        var navRight = document.getElementById('navRight');
-        if (navRight) navRight.appendChild(btn);
-        else document.body.appendChild(btn);
-    }
-
     function initPostFilter() {
         if (currentPage !== 'posts') return;
         var filterBar = document.getElementById('filterBar');
@@ -372,7 +275,7 @@
         window.RainsRouter.init();
 
         window.RainsCurtain.initPage(currentPage, prefersReducedMotion);
-        initOpeningBell();
+        window.RainsBell.init(currentPage, prefersReducedMotion);
         initPostFilter();
         initProgressBar(); initMetronome();
         initTOC();
