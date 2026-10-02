@@ -10,6 +10,10 @@ const PORT = Number(process.env.PORT || 3000);
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data', 'rains.db');
 const MESSAGE_LIMITS = { name: 80, content: 5000, seat: 20 };
 
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  throw new Error('PORT must be an integer between 1 and 65535');
+}
+
 function parsePositiveInt(value, fallback) {
   if (value === undefined || value === '') return fallback;
   const number = Number(value);
@@ -44,6 +48,7 @@ const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 
 // 中间件
+app.disable('x-powered-by');
 app.use(express.json({ limit: '32kb' }));
 app.use((req, res, next) => {
   const blocked = req.path === '/server.js'
@@ -126,7 +131,10 @@ app.get('/api/posts/:slug/adjacent', (req, res) => {
   const prev = db.prepare('SELECT * FROM posts WHERE status = \'published\' AND published_at < ? ORDER BY published_at DESC LIMIT 1').get(post.published_at);
   const next = db.prepare('SELECT * FROM posts WHERE status = \'published\' AND published_at > ? ORDER BY published_at ASC LIMIT 1').get(post.published_at);
   
-  res.json({ prev, next });
+  res.json({
+    prev: normalizePost(prev),
+    next: normalizePost(next)
+  });
 });
 
 // 项目
