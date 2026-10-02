@@ -122,63 +122,6 @@
     var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var siteChrome = window.RainsChrome;
-    var curtainOpened = false;
-    function openCurtain() {
-        if (curtainOpened) return;
-        curtainOpened = true;
-        var curtain = document.getElementById('curtain');
-        var hero = document.getElementById('hero');
-        var silence = document.getElementById('heroSilence');
-        if (curtain) curtain.classList.add('curtain--open');
-        if (hero) hero.classList.add('hero--lit');
-        setTimeout(function() { if (silence) silence.classList.add('hero__silence--fade'); }, 4000);
-        setTimeout(function() { if (curtain && curtain.parentNode) curtain.style.display = 'none'; }, 2800);
-    }
-
-    /* 统一所有页面的幕布入场动画 */
-    function initPageCurtain() {
-        // 检测是否有 noCurtain 参数，如果有就隐藏幕布
-        var urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('noCurtain') === '1') {
-            var curtain = document.getElementById('curtain');
-            if (curtain) {
-                curtain.style.display = 'none';
-            }
-            return;
-        }
-        
-        // 复用 HTML 中已有的幕布（首页），不存在则动态创建（非首页）
-        var curtain = document.getElementById('curtain');
-        if (!curtain) {
-            curtain = document.createElement('div');
-            curtain.className = 'curtain';
-            curtain.id = 'curtain';
-            curtain.innerHTML =
-                '<div class="curtain__panel curtain__panel--left"><div class="curtain__velvet"></div></div>' +
-                '<div class="curtain__panel curtain__panel--right"><div class="curtain__velvet"></div></div>' +
-                '<div class="curtain__valance"></div>' +
-                '<div class="curtain__light-beam"></div>';
-            document.body.insertBefore(curtain, document.body.firstChild);
-        }
-        curtain.style.display = 'block';
-        // 首页额外点亮 hero 灯光
-        if (currentPage === 'home') {
-            var hero = document.getElementById('hero');
-            if (hero) hero.classList.add('hero--lit');
-        }
-        // 减少动画或触屏：直接打开幕布，无过渡
-        if (prefersReducedMotion || window.matchMedia('(hover: none)').matches) {
-            curtain.classList.add('curtain--open');
-            curtain.style.display = 'none';
-            return;
-        }
-        setTimeout(function() {
-            curtain.classList.add('curtain--open');
-            setTimeout(function() {
-                if (curtain && curtain.parentNode) curtain.style.display = 'none';
-            }, 2800);
-        }, 300);
-    }
 
     /* S4: 开场铃声（Web Audio API 合成三声剧场铃） */
     function initOpeningBell() {
@@ -202,7 +145,7 @@
                 var c = window.RainsAudio._ctx || null;
                 // 用 RainsAudio 内部 tone 不方便，直接用简单实现
                 var ctx = null;
-                try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { openCurtain(); return; }
+                try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { window.RainsCurtain.open(); return; }
                 if (ctx.state === 'suspended') ctx.resume();
                 var now = ctx.currentTime;
                 [0, 0.42, 0.84].forEach(function(t) {
@@ -418,59 +361,6 @@
         });
     }
 
-    /* S2: 确保幕布元素存在（非首页动态注入） */
-    function ensureCurtain() {
-        var curtain = document.getElementById('curtain');
-        if (curtain) return curtain;
-        curtain = document.createElement('div');
-        curtain.className = 'curtain curtain--open';
-        curtain.id = 'curtain';
-        curtain.innerHTML =
-            '<div class="curtain__panel curtain__panel--left"><div class="curtain__velvet"></div></div>' +
-            '<div class="curtain__panel curtain__panel--right"><div class="curtain__velvet"></div></div>' +
-            '<div class="curtain__valance"></div>' +
-            '<div class="curtain__light-beam"></div>';
-        document.body.insertBefore(curtain, document.body.firstChild);
-        return curtain;
-    }
-    
-    // 暴露到全局，供其他页面调用
-    window.ensureCurtain = ensureCurtain;
-
-    /* S2: 页面退出幕布关闭 */
-    function initCurtainExit() {
-        if (prefersReducedMotion) return;
-        document.addEventListener('click', function(e) {
-            var link = e.target.closest('a[href]');
-            if (!link) return;
-            var href = link.getAttribute('href');
-            if (!href) return;
-            // 排除：观众席卡片里面的链接，由专门的事件处理
-            if (link.closest('.comment-book-card')) return;
-            // 排除：新标签页、外链、锚点、mailto、javascript、非 html 页面
-            if (link.target === '_blank' ||
-                href.indexOf('http') === 0 ||
-                href.charAt(0) === '#' ||
-                href.indexOf('mailto:') === 0 ||
-                href.indexOf('javascript:') === 0 ||
-                href.indexOf('.html') === -1) return;
-            // 排除修饰键（Ctrl/Cmd/Shift+点击 = 新标签页）
-            if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return;
-
-            e.preventDefault();
-            window.RainsAudio.playEntracte();
-            var curtain = ensureCurtain();
-            curtain.style.display = 'block';
-            // 强制重排以确保 transition 生效
-            void curtain.offsetWidth;
-            curtain.classList.remove('curtain--open');
-            curtain.classList.add('curtain--closing');
-            setTimeout(function() {
-                window.RainsRouter.push(href);
-            }, 650);
-        });
-    }
-
     /* S5: 散场灯光 — 滚动到谢幕区时背景渐亮 */
     function initHouseLights() {
         if (currentPage !== 'post') return;
@@ -584,14 +474,14 @@
         // 初始化路由（加载首页内容）
         window.RainsRouter.init();
 
-        initPageCurtain();
+        window.RainsCurtain.initPage(currentPage, prefersReducedMotion);
         initOpeningBell();
         initPostFilter();
         initProgressBar(); initMetronome();
         initTOC();
         initTearAnimation();
         initTearSource();
-        initCurtainExit();
+        window.RainsCurtain.initExit(prefersReducedMotion);
         initHouseLights();
         initCurrentTime();
         console.log('Rains loaded — page:', currentPage);
@@ -606,7 +496,7 @@
                 // 1.2秒翻页动画结束后，触发幕布动画，然后跳转
                 setTimeout(function() {
                     // 手动触发幕布关闭动画
-                    var curtain = ensureCurtain();
+                    var curtain = window.RainsCurtain.ensure();
                     curtain.style.display = 'block';
                     void curtain.offsetWidth;
                     curtain.classList.remove('curtain--open');
@@ -684,7 +574,7 @@
                 if (btn.tagName === 'A' && href && href.indexOf('.html') !== -1) {
                     // 播放幕布关闭动画
                     window.RainsAudio.playEntracte();
-                    var curtain = ensureCurtain();
+                    var curtain = window.RainsCurtain.ensure();
                     curtain.style.display = 'block';
                     void curtain.offsetWidth;
                     curtain.classList.remove('curtain--open');
