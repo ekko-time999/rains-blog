@@ -7,6 +7,7 @@ const Database = require('better-sqlite3');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data', 'rains.db');
 const MESSAGE_LIMITS = { name: 80, content: 5000, seat: 20 };
 
 function parsePositiveInt(value, fallback) {
@@ -39,12 +40,24 @@ function normalizeProject(project) {
 }
 
 // 数据库
-const db = new Database(path.join(__dirname, 'data', 'rains.db'));
+const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 
 // 中间件
 app.use(express.json({ limit: '32kb' }));
-app.use(express.static(path.join(__dirname)));
+app.use((req, res, next) => {
+  const blocked = req.path === '/server.js'
+    || req.path === '/init-db.js'
+    || req.path === '/package.json'
+    || req.path === '/package-lock.json'
+    || req.path.startsWith('/data/');
+  if (blocked) return res.status(404).end();
+  next();
+});
+app.use(express.static(path.join(__dirname), {
+  etag: true,
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0
+}));
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -145,7 +158,7 @@ app.get('/api/recommendations', (req, res) => {
 // 留言板
 app.get('/api/messages', (req, res) => {
   const messages = db.prepare(`
-    SELECT * FROM messages 
+    SELECT id, name, content, seat, created_at FROM messages
     WHERE status = 'approved' 
     ORDER BY created_at DESC
   `).all();
@@ -173,6 +186,10 @@ app.post('/api/messages', (req, res) => {
     VALUES (?, ?, ?, 'pending')
   `).run(name, content, seat);
   res.json({ id: result.lastInsertRowid, status: 'pending' });
+});
+
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'API route not found' });
 });
 
 // ========== SPA 路由 ==========
