@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rains — 用代码演绎你的想象</title>
+    <meta name="description" content="Rains — 用代码演绎你的想象。音乐剧主题个人博客。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@400;700;900&family=JetBrains+Mono:wght@400;500&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=35">
+    <link rel="stylesheet" href="css/orchestra-pit.css?v=17">
+</head>
+<body data-page="home">
+    <div class="spotlight-left"></div>
+    <div class="spotlight-right"></div>
+    <nav id="main-nav" data-nav></nav>
+
+    <div class="curtain" id="curtain">
+        <div class="curtain__panel curtain__panel--left"><div class="curtain__velvet"></div></div>
+        <div class="curtain__panel curtain__panel--right"><div class="curtain__velvet"></div></div>
+        <div class="curtain__valance"></div>
+        <div class="curtain__light-beam"></div>
+    </div>
+
+    <main id="app">
+        <!-- 页面内容由 router 动态加载 -->
+    </main>
+
+    <footer id="main-footer" data-footer></footer>
+
+    <!-- 乐池 (Orchestra Pit) — 音乐播放器，固定于视口底部 -->
+    <div class="orchestra-pit is-idle" id="orchestra-pit">
+        <div class="op-panel">
+            <div class="op-panel__header">
+                <span class="op-panel__title">✦ 乐池 · Rains Theatre</span>
+                <div class="op-panel__actions">
+                    <button class="op-collapse-btn" title="合上">合上</button>
+                    <button class="op-close-btn" title="关闭"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+                </div>
+            </div>
+            <div class="op-panel__main">
+                <div class="op-cover" id="opCover"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M9 18V5l12-2v13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></div>
+                <div class="op-info">
+                    <div class="op-info__type" id="opType">— 待开场 —</div>
+                    <div class="op-info__title" id="opTitle">乐池已就位</div>
+                    <div class="op-info__artist" id="opArtist">点击播放，开始第一场演出</div>
+                </div>
+            </div>
+            <div class="op-progress">
+                <span id="opCurTime">0:00</span>
+                <div class="op-progress__track" id="opTrack">
+                    <div class="op-progress__fill" id="opFill"></div>
+                    <div class="op-progress__knob" id="opKnob"></div>
+                </div>
+                <span id="opDurTime">0:00</span>
+            </div>
+            <div class="op-controls">
+                <div class="op-mode-wrap">
+                    <button class="op-ctrl-btn" id="opMode" title="播放模式">
+                        <svg class="op-mode-icon op-mode-icon--order" viewBox="0 0 24 24" width="18" height="18" style="display:block"><path d="M3 6h18M3 12h18M3 18h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <svg class="op-mode-icon op-mode-icon--one" viewBox="0 0 24 24" width="18" height="18" style="display:none"><path d="M17 2l4 4-4 4M3 11v-1a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 01-4 4H3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="12" y="15" text-anchor="middle" font-size="8" fill="currentColor" stroke="none">1</text></svg>
+                        <svg class="op-mode-icon op-mode-icon--all" viewBox="0 0 24 24" width="18" height="18" style="display:none"><path d="M17 2l4 4-4 4M3 11v-1a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 01-4 4H3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg class="op-mode-icon op-mode-icon--shuffle" viewBox="0 0 24 24" width="18" height="18" style="display:none"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="op-mode-menu" id="opModeMenu">
+                        <div class="op-mode-option" data-mode="order"><span class="op-mode-option__dot"></span>顺序播放</div>
+                        <div class="op-mode-option" data-mode="one"><span class="op-mode-option__dot"></span>单曲循环</div>
+                        <div class="op-mode-option" data-mode="all"><span class="op-mode-option__dot"></span>列表循环</div>
+                        <div class="op-mode-option" data-mode="shuffle"><span class="op-mode-option__dot"></span>随机播放</div>
+                    </div>
+                </div>
+                <button class="op-ctrl-btn" id="opPrev" title="上一首"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M5 4v16M19 5L9 12l10 7z" fill="currentColor"/></svg></button>
+                <button class="op-ctrl-btn op-ctrl-btn--play" id="opPlay" title="播放">
+                    <svg class="op-icon-play" viewBox="0 0 24 24" width="22" height="22"><path d="M7 4l12 8-12 8z" fill="currentColor"/></svg>
+                    <svg class="op-icon-pause" viewBox="0 0 24 24" width="22" height="22"><path d="M6 4h5v16H6zM13 4h5v16h-5z" fill="currentColor"/></svg>
+                </button>
+                <button class="op-ctrl-btn" id="opNext" title="下一首"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M5 5l10 7L5 19zM19 4v16" fill="currentColor"/></svg></button>
+                <div class="op-volume">
+                    <svg class="op-volume__icon" viewBox="0 0 24 24" width="18" height="18"><path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    <div class="op-volume__bulbs" id="opVolBulbs"></div>
+                </div>
+                <button class="op-ctrl-btn" id="opFav" title="收藏"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 6.6l-1-2a5.5 5.5 0 00-7.8 7.8L12 22l8.8-9.6a5.5 5.5 0 000-7.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="op-playlist">
+                <div class="op-playlist__header">
+                    <span><svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align:-2px"><path d="M8 3h8a3 3 0 013 3v12a3 3 0 01-3 3H8a3 3 0 01-3-3V6a3 3 0 013-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 7h8M8 11h8M8 15h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> 节目单</span>
+                    <span id="opTrackCount">共 0 首</span>
+                </div>
+                <div id="opPlaylistBody"></div>
+            </div>
+        </div>
+        <div class="op-bar" id="opBar">
+            <div class="op-bulbs" id="opBulbs"></div>
+            <span class="op-note">♪</span>
+            <span class="op-label" id="opBarLabel">乐池 · 今日休演</span>
+            <div class="op-title-wrap">
+                <span class="op-title is-idle" id="opBarTitle">舞台已就绪，等待第一场演出</span>
+            </div>
+            <button class="op-bar-btn" id="opBarPlay" title="播放">
+                <svg class="op-icon-play" viewBox="0 0 24 24" width="14" height="14"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>
+                <svg class="op-icon-pause" viewBox="0 0 24 24" width="14" height="14"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>
+            </button>
+            <button class="op-bar-btn op-ring-btn" id="opExpand" title="展开乐池" aria-label="展开乐池">
+                <svg class="op-ring" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+            </button>
+            <span class="op-hint" id="opHint">⌃ 掀开</span>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/main.js?v=3"></script>
+    <script src="js/orchestra-pit.js"></script>
+    <script src="js/music-config.js"></script>
+    <script src="js/orchestra-player.js"></script>
+    <script src="js/orchestra-prefs.js"></script>
+    <script src="js/orchestra-playlist.js"></script>
+    <!-- 页面初始化模块 -->
+    <script src="js/pages/home.js"></script>
+    <script src="js/pages/posts.js"></script>
+    <script src="js/pages/post.js"></script>
+    <script src="js/pages/projects.js"></script>
+    <script src="js/pages/about.js"></script>
+    <script src="js/pages/friends.js"></script>
+    <script src="js/pages/recommendations.js"></script>
+    <script src="js/pages/archive.js"></script>
+    <script src="js/pages/audience.js"></script>
+</body>
+</html>

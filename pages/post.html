@@ -1,0 +1,28 @@
+<section class="section" style="padding-top: var(--space-xl); position: relative;">
+    
+    <!-- 左上角返回按钮（在深色背景上，避开跑马灯） -->
+    <div style="position: fixed; top: 150px; left: 20px; z-index: 100;">
+        <a href="posts.html" class="btn-ticket" style="transform: scale(0.7); transform-origin: top left;">
+            <span class="btn-ticket__main">
+                <span class="btn-ticket__sub">← Back</span>
+                <span class="btn-ticket__label">返回剧目表</span>
+            </span>
+            <span class="btn-ticket__perforation"></span>
+            <span class="btn-ticket__stub">
+                <span class="btn-ticket__stub-label">幕间</span>
+                <span class="btn-ticket__stub-vertical">BACK</span>
+            </span>
+        </a>
+    </div>
+
+    <div class="container" style="max-width: 1400px;">
+        
+        <!-- 动态渲染容器 -->
+        <div id="postContainer">
+            <div style="text-align:center; padding:var(--space-3xl); color:var(--text-dim);">
+                <p style="font-family:var(--font-mono); font-size:0.8rem; letter-spacing:0.3em;">CURTAIN RISING...</p>
+            </div>
+        </div>
+
+    </div>
+</section>

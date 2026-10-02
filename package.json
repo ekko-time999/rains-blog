@@ -1,0 +1,14 @@
+{
+  "name": "rains-blog",
+  "version": "1.0.0",
+  "description": "Rains — 音乐剧主题个人博客",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "express": "^4.19.2"
+  }
+}
