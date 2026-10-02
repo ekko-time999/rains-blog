@@ -1,0 +1,557 @@
+/* ============================================================
+   Rains 乐池 (Orchestra Pit) — 音乐播放器
+   固定于视口底部，收起为金色灯带，展开为乐池面板
+   ============================================================ */
+
+.orchestra-pit {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9000;              /* 低于幕布 9999，幕布关闭时自然遮住 */
+    background: var(--backstage);
+    border-top: 1px solid var(--gold);  /* 台口金线 */
+    transition: height 0.55s cubic-bezier(0.34, 1.2, 0.64, 1);
+    height: 48px;               /* 收起：仅灯带 */
+    box-shadow: 0 -4px 24px rgba(212, 160, 23, 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;           /* 收起时裁掉面板 */
+}
+
+.orchestra-pit--expanded {
+    height: 540px;              /* 展开：灯带 48 + 面板 492 */
+}
+
+/* ---------- 收起灯带（始终可见） ---------- */
+.op-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 48px;
+    padding: 0 16px;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+    position: relative;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+/* 门缝金线：贯穿灯带，挂着拉环 */
+.op-bar::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.35;
+    transform: translateY(-50%);
+    animation: opSeamBreathe 3.5s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes opSeamBreathe {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.6; }
+}
+/* hover 整条灯带亮起 */
+.op-bar:hover {
+    background: rgba(245, 197, 24, 0.06);
+    box-shadow: inset 0 0 20px rgba(245, 197, 24, 0.12);
+}
+.op-bar:hover::before { opacity: 0.9; }
+
+/* 金色拉环按钮（右端） */
+.op-ring-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    transition: background 0.2s, color 0.2s, transform 0.3s;
+}
+.op-ring-btn .op-ring { display: block; animation: opRingFloat 3.5s ease-in-out infinite; }
+@keyframes opRingFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+/* 首访浮动幅度大一点 */
+.orchestra-pit.is-intro .op-ring { animation-duration: 1.8s; }
+/* hover 拉环立起 */
+.op-bar:hover .op-ring { animation: none; transform: translateY(-3px); }
+.op-ring-btn:hover { background: var(--gold); color: var(--backstage); }
+
+/* 提示语 */
+.op-hint {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: opacity 0.3s;
+}
+
+/* 打开状态：金线暗红、拉环翻转、提示语变（文字由 JS 切） */
+.orchestra-pit--expanded .op-bar::before {
+    background: var(--curtain);
+    opacity: 0.7;
+    animation: none;
+}
+.orchestra-pit--expanded .op-ring {
+    animation: none;
+    transform: rotate(180deg);
+}
+
+/* 灯珠串：舞台脚灯 */
+.op-bulbs {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    flex-shrink: 0;
+}
+.op-bulb {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #5a4a20;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+/* 播放中灯珠点亮（JS 加 .is-live） */
+.orchestra-pit.is-live .op-bulb {
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold);
+}
+/* 暂停中：只亮一颗红灯 */
+.orchestra-pit.is-paused .op-bulb { background: #5a4a20; box-shadow: none; }
+.orchestra-pit.is-paused .op-bulb--red {
+    background: #c0392b;
+    box-shadow: 0 0 6px #c0392b;
+}
+
+/* 音符图标 */
+.op-note {
+    color: var(--gold);
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    transition: transform 0.4s;
+}
+.orchestra-pit.is-live .op-note {
+    animation: opNoteSpin 2.4s linear infinite;
+}
+@keyframes opNoteSpin {
+    0%   { transform: rotate(-12deg); }
+    50%  { transform: rotate(12deg); }
+    100% { transform: rotate(-12deg); }
+}
+
+/* "正在上演"标签 */
+.op-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* 滚动歌名 */
+.op-title-wrap {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.op-title {
+    display: inline-block;
+    color: #E8DCC8;
+    font-size: 0.85rem;
+    padding-left: 100%;
+    animation: opScroll 12s linear infinite;
+}
+.op-title.is-idle {
+    animation: none;
+    padding-left: 0;
+    color: var(--text-dim);
+}
+@keyframes opScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+/* 灯带按钮 */
+.op-bar-btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+.op-bar-btn:hover {
+    background: var(--gold);
+    color: var(--backstage);
+}
+.op-expand-btn {
+    width: auto;
+    padding: 0 10px;
+    border-radius: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    gap: 6px;
+    display: flex;
+    align-items: center;
+}
+
+/* ---------- 展开面板（默认隐藏，靠高度裁剪） ---------- */
+.op-panel {
+    height: 492px;             /* 面板总高，节目单完整显示 5 首歌 */
+    overflow: hidden;
+    border-top: 1px solid var(--orchestra);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 面板标题栏 */
+.op-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--orchestra);
+    flex-shrink: 0;
+}
+.op-panel__title {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+}
+.op-panel__actions { display: flex; gap: 8px; align-items: center; }
+.op-panel__actions button {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+.op-panel__actions button:hover { color: var(--gold); background: var(--orchestra); }
+.op-close-btn { display: flex; align-items: center; justify-content: center; }
+.op-close-btn svg { display: block; }
+
+/* 面板主体 */
+.op-panel__main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    flex-shrink: 0;
+}
+
+/* 专辑封面（舞台海报） */
+.op-cover {
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    background: linear-gradient(135deg, #2a1f14, #1a1410);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--gold);
+    position: relative;
+    overflow: hidden;
+}
+/* 聚光灯：播放时上方打光 */
+.op-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% -20%, rgba(212,160,23,0.35), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+.orchestra-pit.is-live .op-cover::before { opacity: 1; }
+.op-cover__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 曲信息 */
+.op-info { flex: 1; min-width: 0; }
+.op-info__type {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 4px;
+}
+.op-info__title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: #E8DCC8;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.op-info__artist {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+}
+
+/* 进度条（幕布） */
+.op-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+}
+.op-progress__track {
+    flex: 1;
+    height: 8px;
+    background: linear-gradient(180deg, #5a1010, #8B1A1A);  /* 红色幕布 */
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+.op-progress__fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    background: linear-gradient(180deg, #f4d06a, var(--gold)); /* 拉开露出的舞台 */
+    border-radius: 4px;
+    transition: width 0.2s linear;
+}
+.op-progress__knob {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    left: 0%;
+    box-shadow: 0 0 8px var(--gold);
+    transition: left 0.2s linear;
+}
+
+/* 控制按钮 */
+.op-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 20px 12px;
+    flex-wrap: wrap;
+}
+.op-ctrl-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, transform 0.2s;
+}
+.op-ctrl-btn svg { width: 28px; height: 28px; }
+.op-ctrl-btn--play svg { width: 24px; height: 24px; }
+.op-ctrl-btn:hover { color: var(--gold); transform: scale(1.1); }
+.op-ctrl-btn--play {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+}
+.op-ctrl-btn--play:hover { background: var(--gold); color: var(--backstage); }
+.op-ctrl-btn--active { color: var(--gold); }
+/* 收藏激活时心形填充金色 */
+.op-ctrl-btn--active svg path { fill: currentColor; }
+
+/* 播放/暂停双图标切换 */
+.op-ctrl-btn--play .op-icon-pause,
+.op-bar-btn .op-icon-pause { display: none; }
+.op-ctrl-btn--play.is-playing .op-icon-play,
+.op-bar-btn.is-playing .op-icon-play { display: none; }
+.op-ctrl-btn--play.is-playing .op-icon-pause,
+.op-bar-btn.is-playing .op-icon-pause { display: block; }
+.op-bar-btn { display: flex; align-items: center; justify-content: center; }
+.op-bar-btn svg { display: block; }
+
+/* 封面 SVG 颜色继承 */
+.op-cover { color: var(--gold); }
+
+/* 音量灯泡：喇叭和灯泡共用一条底边对齐 */
+/* 播放模式选择器 */
+.op-mode-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.op-mode-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    transform: translateY(4px);
+    background: var(--backstage);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 6px 0;
+    min-width: 120px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+    z-index: 9001;
+}
+.op-mode-menu.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.op-mode-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+.op-mode-option:hover {
+    background: var(--orchestra);
+    color: var(--gold);
+}
+.op-mode-option--active {
+    color: var(--gold);
+}
+.op-mode-option__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--text-dim);
+    flex-shrink: 0;
+}
+.op-mode-option--active .op-mode-option__dot {
+    background: var(--gold);
+    border-color: var(--gold);
+    box-shadow: 0 0 6px var(--gold);
+}
+
+.op-volume {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    margin-left: auto;
+    padding-bottom: 6px;
+}
+.op-volume__icon { display: block; margin-bottom: -5px; }
+.op-volume__bulbs { display: flex; gap: 3px; align-items: flex-end; }
+.op-volume__bulb {
+    width: 5px;
+    background: #3a3a3a;
+    border-radius: 2px;
+    transition: background 0.2s;
+}
+.op-volume__bulb--on { background: var(--gold); box-shadow: 0 0 4px var(--gold); }
+
+/* 节目单 */
+.op-playlist {
+    flex: 1;
+    overflow-y: auto;
+    border-top: 1px solid var(--orchestra);
+}
+.op-playlist__header {
+    padding: 8px 20px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--orchestra);
+    display: flex;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--backstage);
+}
+.op-track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.op-track:hover { background: var(--orchestra); }
+.op-track--playing { color: var(--gold); background: rgba(212,160,23,0.08); }
+.op-track__num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    width: 24px;
+    color: var(--text-dim);
+}
+.op-track--playing .op-track__num { color: var(--gold); }
+.op-track__title { flex: 1; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.op-track__time { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); }
+.op-track__fav { color: var(--gold); font-size: 0.75rem; }
+
+/* 页面底部预留灯带高度，保证 footer 不被遮挡 */
+body {
+    padding-bottom: 48px;
+}
+
+/* footer 滚入视口时：轻微淡入 + 上浮，像谢幕字幕从舞台深处浮现 */
+#main-footer {
+    opacity: 0.96;
+    transform: translateY(4px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+#main-footer.footer--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 移动端 */
+@media (max-width: 640px) {
+    .orchestra-pit { height: 40px; }
+    .orchestra-pit--expanded { height: 70vh; }
+    .op-bar { height: 40px; padding: 0 12px; gap: 8px; flex-shrink: 0; }
+    .op-label { display: none; }
+    .op-panel { height: calc(70vh - 40px); }
+    .op-cover { width: 64px; height: 64px; }
+    .op-info__title { font-size: 1rem; }
+    body { padding-bottom: 40px; }
+}

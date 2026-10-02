@@ -1,0 +1,38 @@
+<section class="section" style="padding-top: var(--space-2xl);">
+            <div class="container">
+                <!-- 页面标题 -->
+                <div style="text-align:center; margin-bottom: var(--space-lg);">
+                    <p style="font-family:var(--font-mono); font-size:0.75rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; margin-bottom:0.5rem;">— Playbill —</p>
+                    <h1 style="font-family:var(--font-display); font-size:clamp(2rem,5vw,3.5rem); margin-bottom:0.5rem;">剧目表</h1>
+                    <p style="color:var(--text-dim); font-style:italic;">每一篇文章，都是一场演出</p>
+                </div>
+
+                <!-- 分类筛选 -->
+                <div class="filter-bar" id="filterBar" style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:var(--space-lg);">
+                    <button class="tag tag-active filter-btn" data-category="">全部</button>
+                    <button class="tag filter-btn" data-category="技术笔记">技术笔记</button>
+                    <button class="tag filter-btn" data-category="项目复盘">项目复盘</button>
+                    <button class="tag filter-btn" data-category="随想">随想</button>
+                </div>
+
+                <!-- 票根网格（动态渲染） -->
+                <div class="ticket-grid" id="ticketGrid">
+                    <div style="grid-column:1/-1; text-align:center; padding:var(--space-xl); color:var(--text-dim);">
+                        <p style="font-family:var(--font-mono); font-size:0.8rem; letter-spacing:0.2em;">LOADING PLAYBILL...</p>
+                    </div>
+                </div>
+
+                <!-- 空状态 -->
+                <div id="emptyState" style="display:none; text-align:center; padding:var(--space-xl); color:var(--text-dim);">
+                    <p style="font-family:var(--font-display); font-size:1.5rem; margin-bottom:0.5rem;">暂无演出</p>
+                    <p style="font-family:var(--font-mono); font-size:0.8rem;">该分类下暂无文章，敬请期待</p>
+                </div>
+
+                <!-- 分页 -->
+                <div class="pagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--space-xl); padding-top:var(--space-md); border-top:1px solid var(--orchestra);">
+                    <button class="btn btn-gold" disabled style="opacity:0.3; cursor:not-allowed;">← 上一幕</button>
+                    <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-dim);">第 1 幕 / 共 1 幕</span>
+                    <button class="btn" disabled style="opacity:0.3; cursor:not-allowed;">下一幕 →</button>
+                </div>
+            </div>
+        </section>

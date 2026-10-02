@@ -1,0 +1,152 @@
+<!-- ========== HERO: 剧场入场 ========== -->
+<section class="hero" id="hero">
+    <div class="hero__spotlight" id="heroSpotlight"></div>
+    <div class="hero__content" id="heroContent">
+        <p class="hero__pretitle">— A Personal Theatre —</p>
+        <h1 class="hero__title">RAINS</h1>
+        <p class="hero__slogan">用代码演绎你的想象</p>
+        <div class="hero__divider">
+            <span class="hero__divider-dot"></span>
+            <span class="hero__divider-line"></span>
+            <span class="hero__divider-dot"></span>
+        </div>
+        <div class="hero__cta">
+            <a href="javascript:void(0)" class="btn-ticket" id="enterTheatreBtn">
+                <span class="btn-ticket__main">
+                    <span>进入剧场</span>
+                    <span class="btn-ticket__sub">Enter the Theatre</span>
+                </span>
+                <span class="btn-ticket__perforation"></span>
+                <span class="btn-ticket__stub">
+                    <span class="btn-ticket__stub-label">开幕<br><span id="currentTime">19:30</span></span>
+                    <span class="btn-ticket__stub-vertical">TEAR HERE</span>
+                </span>
+            </a>
+            <a href="about.html" class="btn-ticket" style="margin-left: 0.5rem;">
+                <span class="btn-ticket__main">
+                    <span>关于主理人</span>
+                    <span class="btn-ticket__sub">About the Director</span>
+                </span>
+                <span class="btn-ticket__perforation"></span>
+                <span class="btn-ticket__stub">
+                    <span class="btn-ticket__stub-label">谢幕<br>Encore</span>
+                    <span class="btn-ticket__stub-vertical">TEAR HERE</span>
+                </span>
+            </a>
+        </div>
+    </div>
+    <div class="hero__silence" id="heroSilence">
+        <span class="hero__silence-icon">&#128276;</span>
+        <span>演出即将开始，请将手机调至静音</span>
+    </div>
+    <div class="hero__scroll" id="heroScroll">
+        <span class="hero__scroll-text">向下滚动</span>
+        <div class="hero__scroll-line"></div>
+    </div>
+</section>
+
+<!-- ========== NOW PLAYING: 最新文章 ========== -->
+<section class="section" id="now-playing" style="scroll-margin-top: 50vh;">
+    <div class="container">
+        <h2 class="section-title">Now Playing</h2>
+        <p class="section-subtitle">— 正在上演 —</p>
+        <div class="ticket-grid" id="latestPostsGrid" style="margin-bottom: var(--space-lg);">
+            <div style="grid-column:1/-1; text-align:center; padding:var(--space-lg); color:var(--text-dim); font-family:var(--font-mono); font-size:0.8rem; letter-spacing:0.2em;">LOADING...</div>
+        </div>
+        <div style="text-align:center;">
+            <a href="posts.html" class="btn-ticket">
+                <span class="btn-ticket__main">
+                    <span>查看全部剧目 →</span>
+                    <span class="btn-ticket__sub">All Shows</span>
+                </span>
+                <span class="btn-ticket__perforation"></span>
+                <span class="btn-ticket__stub">
+                    <span class="btn-ticket__stub-label">全部<br>剧目</span>
+                    <span class="btn-ticket__stub-vertical">TICKET</span>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== WORKSHOP: 工坊精选 ========== -->
+<section class="section" id="repertoire" style="background:var(--backstage);">
+    <div class="container">
+        <h2 class="section-title">Creative Workshop</h2>
+        <p class="section-subtitle">— 创意工坊 —</p>
+        <div class="project-grid" id="latestProjectsGrid" style="margin-bottom: var(--space-lg);">
+            <div style="grid-column:1/-1; text-align:center; padding:var(--space-lg); color:var(--text-dim); font-family:var(--font-mono); font-size:0.8rem;">LOADING...</div>
+        </div>
+        <div style="text-align:center;">
+            <a href="projects.html" class="btn-ticket">
+                <span class="btn-ticket__main">
+                    <span>查看全部作品 →</span>
+                    <span class="btn-ticket__sub">All Works</span>
+                </span>
+                <span class="btn-ticket__perforation"></span>
+                <span class="btn-ticket__stub">
+                    <span class="btn-ticket__stub-label">全部<br>作品</span>
+                    <span class="btn-ticket__stub-vertical">TICKET</span>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== GUEST STARS: 友链预览 ========== -->
+<section class="section" id="friends-preview">
+    <div class="container">
+        <h2 class="section-title">Guest Stars</h2>
+        <p class="section-subtitle">— 特别鸣谢 —</p>
+        <div class="friends-featured" id="latestFriendsGrid" style="margin-bottom: var(--space-lg);">
+            <div style="grid-column:1/-1; text-align:center; padding:var(--space-lg); color:var(--text-dim); font-family:var(--font-mono); font-size:0.8rem;">LOADING...</div>
+        </div>
+        <div style="text-align:center;">
+            <a href="friends.html" class="btn-ticket">
+                <span class="btn-ticket__main">
+                    <span>更多友情客串 →</span>
+                    <span class="btn-ticket__sub">All Guests</span>
+                </span>
+                <span class="btn-ticket__perforation"></span>
+                <span class="btn-ticket__stub">
+                    <span class="btn-ticket__stub-label">全部<br>客串</span>
+                    <span class="btn-ticket__stub-vertical">GUEST</span>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="recs-preview" style="background:var(--backstage);">
+    <div class="container">
+        <h2 class="section-title">Curator's Picks</h2>
+        <p class="section-subtitle">— 主理人荐 —</p>
+        <div class="rec-grid" id="latestRecsGrid" style="margin-bottom: var(--space-lg);">
+            <div style="grid-column:1/-1; text-align:center; padding:var(--space-lg); color:var(--text-dim); font-family:var(--font-mono); font-size:0.8rem;">LOADING...</div>
+        </div>
+        <div style="text-align:center;">
+            <a href="recommendations.html" class="btn-ticket">
+                <span class="btn-ticket__main">
+                    <span>查看全部私藏 →</span>
+                    <span class="btn-ticket__sub">All Faves</span>
+                </span>
+                <span class="btn-ticket__perforation"></span>
+                <span class="btn-ticket__stub">
+                    <span class="btn-ticket__stub-label">全部<br>私藏</span>
+                    <span class="btn-ticket__stub-vertical">FAVE</span>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== AUDIENCE: 观众席预览 ========== -->
+<section class="section" id="audience-preview">
+    <div class="container">
+        <h2 class="section-title">Auditorium</h2>
+        <p class="section-subtitle">— 观众席 —</p>
+        <div class="comment-book-card" id="latestMessagesCard">
+            <div style="grid-column:1/-1; text-align:center; padding:var(--space-lg); color:var(--text-dim); font-family:var(--font-mono); font-size:0.8rem;">LOADING...</div>
+        </div>
+    </div>
+</section>

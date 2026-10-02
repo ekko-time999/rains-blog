@@ -1,0 +1,59 @@
+<section class="section" style="padding-top: var(--space-2xl);">
+    <div class="container-wide">
+        <div style="text-align:center; margin-bottom: var(--space-lg);">
+            <p style="font-family:var(--font-mono); font-size:0.75rem; letter-spacing:0.3em; color:var(--gold); text-transform:uppercase; margin-bottom:0.5rem;">— Auditorium —</p>
+            <h1 style="font-family:var(--font-display); font-size:clamp(2rem,5vw,3.5rem); margin-bottom:0.5rem;">观众席</h1>
+            <p style="color:var(--text-dim); font-style:italic;">幕布已落，掌声未落——写下你的观演感受</p>
+        </div>
+
+        <!-- 留言表单（节目单背面样式） -->
+        <div class="message-form-wrap">
+            <form id="messageForm" class="message-form">
+                <h3 class="message-form__title">✦ 写下一句</h3>
+                <div class="message-form__two-col">
+                    <div class="message-form__left">
+                        <div class="message-form__field">
+                            <label>选个座位（可选）</label>
+                            <div class="seat-map" id="seatMap">
+                                <div class="seat-map__stage">✦ 舞台方向 ✦</div>
+                                <div class="seat-map__aisle"></div>
+                                <div class="seat-map__rows" id="seatRows"></div>
+                                <div class="seat-map__actions">
+                                    <button type="button" class="seat-map__random-btn" id="randomSeatBtn">随机座位</button>
+                                    <button type="button" class="seat-map__clear-btn" id="clearSeatBtn">清空</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message-form__right">
+                        <div class="message-form__field">
+                            <label for="msgName">你的称呼</label>
+                            <input type="text" id="msgName" placeholder="怎么称呼你？" maxlength="20" required>
+                        </div>
+                        <div class="message-form__field">
+                            <label for="msgContent">观演感受</label>
+                            <textarea id="msgContent" placeholder="这场演出让你想到了什么？" rows="6" maxlength="500" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-ticket btn-ticket--compact" style="display: inline-flex; margin: 0 auto;">
+                            <span class="btn-ticket__main">
+                                <span>写下一句 →</span>
+                                <span class="btn-ticket__sub">Leave a Note</span>
+                            </span>
+                            <span class="btn-ticket__perforation"></span>
+                            <span class="btn-ticket__stub">
+                                <span class="btn-ticket__stub-label">加演<br>ENCORE</span>
+                                <span class="btn-ticket__stub-vertical">TICKET</span>
+                            </span>
+                        </button>
+                        <p class="message-form__hint">* 留言将由主理人审核后展示</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 留言墙 -->
+        <div class="message-wall" id="messageWall">
+            <div style="text-align:center; padding:var(--space-xl); color:var(--text-dim);">加载中...</div>
+        </div>
+    </div>
+</section>
